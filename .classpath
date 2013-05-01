@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Projects/SSearchM/jgit/org.eclipse.jgit-2.3.1.201302201838-r.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Projects/SSearchM/jgit/org.eclipse.jgit-2.3.1.201302201838-r-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Projects/SSearchM/lucene/lucene-3.6.2/lucene-core-3.6.2.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Projects/SSearchM/lucene/lucene-3.6.2/lucene-core-3.6.2-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Projects/SSearchM/semanticvectors/semanticvectors-3.8.jar" sourcepath="C:/Projects/SSearchM/semanticvectors/semanticvectors-3.8"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
