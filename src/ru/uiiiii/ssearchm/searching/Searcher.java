@@ -11,7 +11,7 @@ public class Searcher {
 	private static final int MAX_RESULTS = 20;
 
 	public static void main(String[] args) throws IOException, ZeroVectorException {
-		String[] query = {"Abraham"};
+		String[] query = {"queue"};
 		
 		LinkedList<SearchResult> results = SemanticVectorsSearcher.performSearch(query, MAX_RESULTS);
 		

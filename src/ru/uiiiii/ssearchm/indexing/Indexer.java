@@ -10,7 +10,7 @@ import pitt.search.semanticvectors.BuildIndex;
 
 public class Indexer {
 	
-	private final static String DOCS_PATH = "C:\\Users\\Всеволод\\Desktop\\lucene-3.6.2-src\\lucene-3.6.2";
+	private final static String DOCS_PATH = "C:\\Projects\\SSearchM\\tests\\hudson";
 
 	public static void main(String[] args) throws CorruptIndexException, LockObtainFailedException, IOException {
 	    String docsPath = DOCS_PATH;
