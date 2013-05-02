@@ -11,7 +11,6 @@ import java.util.TreeSet;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.index.FieldInfo.IndexOptions;
 import org.apache.lucene.index.IndexWriter;
@@ -24,16 +23,15 @@ import org.apache.lucene.util.Version;
 
 public class LuceneIndexBuilder {
 	
-	private static final String[] JAVA_STOP_WORDS = {
-		"public","private","protected","interface","abstract","implements",
-		"extends","null","new" ,"switch","case", "default" ,"synchronized" ,
-		"do", "if", "else","break","continue", "this",  "assert" ,
-		"for","instanceof", "transient", "final", "static" ,"void",  
-		"catch","try","throws","throw",	"class", "finally", "return" ,
-		"const" , "native", "super", "while", "import" , "package" ,"true", "false",
-		"a", "b", "c", "d", "e", "f", "g", "h", "i","j", "k", "l", "m", "n", "o", "p", "q", "r",
-	    "s", "t", "u", "v", "w", "x", "y", "z"
-	};
+	private static final String[] JAVA_STOP_WORDS = { "public", "private",
+			"protected", "interface", "abstract", "implements", "extends",
+			"null", "new", "switch", "case", "default", "synchronized", "do",
+			"if", "else", "break", "continue", "this", "assert", "for",
+			"instanceof", "transient", "final", "static", "void", "catch",
+			"try", "throws", "throw", "class", "finally", "return", "const",
+			"native", "super", "while", "import", "package", "true", "false",
+			"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m",
+			"n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" };
 	
 	public static void buildIndex(String docsPath, String indexPath) throws IOException, CorruptIndexException, LockObtainFailedException {
 		final File docDir = new File(docsPath);
@@ -57,7 +55,7 @@ public class LuceneIndexBuilder {
 		}
 		
 		for (Object word : StandardAnalyzerJava.STOP_WORDS_SET) {
-			stopWords.add(word.toString());
+			stopWords.add(String.valueOf((char[])word));
 		}
 		
 		return stopWords;

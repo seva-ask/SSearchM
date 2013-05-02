@@ -11,20 +11,28 @@ public class JavaNameParser {
 		int length = source.length();
 		while (currentPosition < length) {
 			char currentChar = source.charAt(currentPosition);
-			if (Character.isUpperCase(currentChar)) {
-				String word = stringBuilder.toString().toLowerCase();
-				if (!word.isEmpty()) {
-					result.add(word);
-				}
+			if (currentChar == '.' || currentChar == '_') {
+				addWord(result, stringBuilder);
 				stringBuilder = new StringBuilder();
 			}
-			stringBuilder.append(currentChar);
+			else if (Character.isUpperCase(currentChar)) {
+				addWord(result, stringBuilder);
+				stringBuilder = new StringBuilder();
+				stringBuilder.append(currentChar);
+			}
+			else {
+				stringBuilder.append(currentChar);
+			}
 			currentPosition++;
 		}
+		addWord(result, stringBuilder);
+		return result;
+	}
+
+	private static void addWord(LinkedList<String> result, StringBuilder stringBuilder) {
 		String word = stringBuilder.toString().toLowerCase();
 		if (!word.isEmpty()) {
 			result.add(word);
 		}
-		return result;
 	}
 }
