@@ -20,7 +20,7 @@ public class Searcher {
 			      "%f:%s",
 			      result.getScore(),
 			      result.getObjectVector().getObject().toString()));
-			}
+		}
 	}
 
 }
