@@ -19,6 +19,7 @@ package ru.uiiiii.ssearchm.indexing;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.LinkedList;
 
 import org.apache.lucene.analysis.Tokenizer;
 import org.apache.lucene.analysis.standard.ClassicTokenizer;
@@ -176,6 +177,10 @@ public final class StandardTokenizerJava extends Tokenizer {
   private final PositionIncrementAttribute posIncrAtt = addAttribute(PositionIncrementAttribute.class);
   private final TypeAttribute typeAtt = addAttribute(TypeAttribute.class);
 
+  private LinkedList<String> currentTerms;
+  
+  private State savedState;
+  
   /*
    * (non-Javadoc)
    *
@@ -183,6 +188,13 @@ public final class StandardTokenizerJava extends Tokenizer {
    */
   @Override
   public final boolean incrementToken() throws IOException {
+	if (currentTerms != null && !currentTerms.isEmpty()) {
+		restoreState(savedState);
+		termAtt.setEmpty();
+		termAtt.append(currentTerms.poll());
+		return true;
+	}
+	  
     clearAttributes();
     int posIncr = 1;
 
@@ -211,6 +223,11 @@ public final class StandardTokenizerJava extends Tokenizer {
         } else {
           typeAtt.setType(StandardTokenizerJava.TOKEN_TYPES[tokenType]);
         }
+        String fullName = termAtt.toString();
+        currentTerms = JavaNameParser.parseName(fullName);
+		termAtt.setEmpty();
+		termAtt.append(currentTerms.poll());
+		savedState = captureState();
         return true;
       } else
         // When we skip a too-long term, we still increment the
