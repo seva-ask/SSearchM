@@ -95,10 +95,6 @@ public class LuceneIndexBuilder {
         pathField.setIndexOptions(IndexOptions.DOCS_ONLY);
         doc.add(pathField);
         
-        NumericField modifiedField = new NumericField("modified");
-        modifiedField.setLongValue(file.lastModified());
-        doc.add(modifiedField);
-        
         doc.add(new Field("contents", new BufferedReader(new InputStreamReader(fis, "UTF-8"))));
 
         System.out.println("adding " + file);
