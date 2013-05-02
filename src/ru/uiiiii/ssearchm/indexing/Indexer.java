@@ -41,11 +41,7 @@ public class Indexer {
 	    
 		Date startSemanticVectorsIndexing = new Date();
 		
-		String[] args = new String[2];
-		String argumentIndexPath = "-luceneindexpath";
-		args[0] = argumentIndexPath;
-		String argumentIndexPath2 = "index";
-		args[1] = argumentIndexPath2;
+		String[] args = {"-luceneindexpath", "index"};
 		BuildIndex.main(args);
 		
 	    Date endSemanticVectorsIndexing = new Date();
