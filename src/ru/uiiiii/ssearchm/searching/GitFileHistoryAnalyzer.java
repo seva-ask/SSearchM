@@ -11,23 +11,33 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
+import ru.uiiiii.ssearchm.indexing.Indexer;
+
 public class GitFileHistoryAnalyzer {
-	public static void getBlame(String filePath) throws IOException, GitAPIException {
-		String gitDir = "C:\\Projects\\SSearchM\\tests\\hudson\\.git";
+	public static BlameResult getBlameResult(String filePath) throws IOException, GitAPIException {
+		String docsPath = Indexer.DOCS_PATH;
+		String gitDir = docsPath + "\\.git";
+		
+		String filePathInsideRepo = filePath.replace(docsPath, "").substring(1); // remove \\
 		
 		FileRepositoryBuilder builder = new FileRepositoryBuilder();
-		Repository repository = builder.setGitDir(new File(gitDir))
-		  .readEnvironment() // scan environment GIT_* variables
-		  .findGitDir() // scan up the file system tree
-		  .build();
-		
+		Repository repository = builder.setGitDir(new File(gitDir)).readEnvironment().findGitDir().build();
 		Git git = new Git(repository);
 		
+		ObjectId headId = git.log().call().iterator().next().getId();
+		
 		BlameCommand blame = git.blame();
-		blame.setFilePath(filePath);
-		blame.setStartCommit(ObjectId.fromString("be1f8f91a3dcdcdfd2ed07198659e7eb68abf1f7"));
+		blame.setFilePath(filePathInsideRepo);
+		blame.setStartCommit(headId);
 		blame.setFollowFileRenames(true);
 		BlameResult result = blame.call();
+		
+		return result;
+	}
+	
+	public static void main(String[] args) throws IOException, GitAPIException {
+		String fileBlame = "C:\\Projects\\SSearchM\\tests\\hudson\\.gitignore";
+		BlameResult result = getBlameResult(fileBlame);
 		
 		int linesCount = result.getResultContents().size();
 		
@@ -35,10 +45,5 @@ public class GitFileHistoryAnalyzer {
 			String name = result.getSourceCommitter(i).getName();
 			System.out.println(name);
 		}
-	}
-	
-	public static void main(String[] args) throws IOException, GitAPIException {
-		String fileBlame = ".gitignore";
-		getBlame(fileBlame);
 	}
 }
