@@ -1,4 +1,4 @@
-package ru.uiiiii.ssearchm;
+package ru.uiiiii.ssearchm.indexing;
 
 import java.io.IOException;
 import java.util.Date;

@@ -1,4 +1,4 @@
-package ru.uiiiii.ssearchm;
+package ru.uiiiii.ssearchm.indexing;
 
 import java.io.BufferedReader;
 import java.io.File;
