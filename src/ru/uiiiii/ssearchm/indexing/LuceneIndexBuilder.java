@@ -7,14 +7,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.NumericField;
 import org.apache.lucene.index.CorruptIndexException;
+import org.apache.lucene.index.FieldInfo.IndexOptions;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.FieldInfo.IndexOptions;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -27,7 +26,7 @@ public class LuceneIndexBuilder {
 		final File docDir = new File(docsPath);
 
       	Directory dir = FSDirectory.open(new File(indexPath));
-      	Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_31);
+      	Analyzer analyzer = new StandardAnalyzerJava(Version.LUCENE_31);
       	IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_31, analyzer);
 
         iwc.setOpenMode(OpenMode.CREATE);
@@ -38,6 +37,9 @@ public class LuceneIndexBuilder {
 	}
 	
 	private static void luceneIndexDocsRecursive(IndexWriter writer, File file) throws CorruptIndexException, IOException {
+		if (file.getName().equals(".git")) {
+			return;
+		}
 		if (file.isDirectory()) {
 	        String[] files = file.list();
 	        for (String child : files) {
