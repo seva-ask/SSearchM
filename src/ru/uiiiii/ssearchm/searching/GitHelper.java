@@ -2,6 +2,7 @@ package ru.uiiiii.ssearchm.searching;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -10,8 +11,17 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
 import org.eclipse.jgit.blame.BlameResult;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 import ru.uiiiii.ssearchm.indexing.Indexer;
 
@@ -21,7 +31,10 @@ public class GitHelper {
 	
 	private ObjectId headId;
 	
+	private String docsPath;
+	
 	public GitHelper(String docsPath) throws IOException, NoHeadException, GitAPIException {
+		this.docsPath = docsPath;
 		git = Git.open(new File(docsPath));
 		headId = git.log().call().iterator().next().getId();
 	}
@@ -50,5 +63,28 @@ public class GitHelper {
 		}
 		
 		return commits;
+	}
+	
+	public Set<String> getChangedFiles(RevCommit commit) throws MissingObjectException, IncorrectObjectTypeException, IOException {
+		Repository repository = git.getRepository();
+		RevWalk rw = new RevWalk(repository);
+		RevCommit parent = rw.parseCommit(commit.getParent(0).getId());
+		DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
+		df.setRepository(repository);
+		df.setDiffComparator(RawTextComparator.DEFAULT);
+		df.setDetectRenames(true);
+		List<DiffEntry> diffs = df.scan(parent.getTree(), commit.getTree());
+		
+		TreeSet<String> result = new TreeSet<String>();
+		
+		for (DiffEntry diff : diffs) {
+			String filePathInsideRepo = diff.getNewPath();
+			if (!filePathInsideRepo.equals("/dev/null")) {
+				String fullFilePath = docsPath + "\\" + filePathInsideRepo.replace('/', '\\');
+				result.add(fullFilePath);
+			}
+		}
+		
+		return result;
 	}
 }

@@ -32,7 +32,7 @@ public class Searcher {
 			commits.addAll(fileCommits);	
 		}
 		
-		System.out.println(commits.size());
+		System.out.println(gitHelper.getChangedFiles(commits.first()));
 		
 //		for (SearchResult result: results) {
 //			  System.out.println(String.format(
