@@ -12,18 +12,17 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import pitt.search.semanticvectors.SearchResult;
 import pitt.search.semanticvectors.ZeroVectorException;
-import ru.uiiiii.ssearchm.indexing.Indexer;
+import ru.uiiiii.ssearchm.common.SourceData;
 
 public class Searcher {
 
 	private static final int MAX_RESULTS = 20;
 
 	public static void main(String[] args) throws IOException, ZeroVectorException, NoHeadException, GitAPIException {
-		String[] query = {"queue"};
 		
-		LinkedList<SearchResult> results = SemanticVectorsSearcher.performSearch(query, MAX_RESULTS);
+		LinkedList<SearchResult> results = SemanticVectorsSearcher.performSearch(SourceData.QUERY, MAX_RESULTS);
 		
-		GitHelper gitHelper = new GitHelper(Indexer.DOCS_PATH);
+		GitHelper gitHelper = new GitHelper(SourceData.DOCS_PATH);
 		
 		TreeSet<RevCommit> commits = new TreeSet<RevCommit>();
 		

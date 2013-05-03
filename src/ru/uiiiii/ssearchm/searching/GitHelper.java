@@ -22,6 +22,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
+import ru.uiiiii.ssearchm.common.SourceData;
 import ru.uiiiii.ssearchm.indexing.Indexer;
 
 public class GitHelper {
@@ -39,7 +40,7 @@ public class GitHelper {
 	}
 	
 	private BlameResult getBlameResult(String filePath) throws IOException, GitAPIException {
-		String docsPath = Indexer.DOCS_PATH;
+		String docsPath = SourceData.DOCS_PATH;
 		
 		String filePathInsideRepo = filePath.replace(docsPath, "").substring(1).replace('\\', '/'); // substring(1) = remove '\'
 		
