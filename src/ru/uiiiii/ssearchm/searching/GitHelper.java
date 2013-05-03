@@ -2,6 +2,8 @@ package ru.uiiiii.ssearchm.searching;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -23,7 +25,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 import ru.uiiiii.ssearchm.common.SourceData;
-import ru.uiiiii.ssearchm.indexing.Indexer;
 
 public class GitHelper {
 	
@@ -91,5 +92,17 @@ public class GitHelper {
 		}
 		
 		return result;
+	}
+	
+	public void AddCommitsForIssues(HashMap<String, TreeSet<RevCommit>> issueCommits) throws NoHeadException, GitAPIException {
+		Iterator<RevCommit> iterator = git.log().call().iterator();
+		while (iterator.hasNext()) {
+			RevCommit commit = iterator.next();
+			String issueNumber = CommitMessageParser.getIssueNumber(commit.getFullMessage());
+			if (issueNumber != null && issueCommits.containsKey(issueNumber)) {
+				TreeSet<RevCommit> currentIssueCommits = issueCommits.get(issueNumber);
+				currentIssueCommits.add(commit);
+			}
+		}
 	}
 }

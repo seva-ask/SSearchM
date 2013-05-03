@@ -32,15 +32,36 @@ public class Searcher {
 			commits.addAll(fileCommits);	
 		}
 		
-		HashMap<String, Integer> filesFrequency = new HashMap<String, Integer>();
+		TreeSet<RevCommit> commitsWithoutIssues = new TreeSet<RevCommit>(); 
+		
+		HashMap<String, TreeSet<RevCommit>> issueCommits = new HashMap<String, TreeSet<RevCommit>>();
+		
 		for (RevCommit revCommit : commits) {
-			Set<String> filesInCommit = gitHelper.getChangedFiles(revCommit);
-			for (String fileInCommit : filesInCommit) {
-				if (!filesFrequency.containsKey(fileInCommit)) {
-					filesFrequency.put(fileInCommit, 0);
-				}
-				filesFrequency.put(fileInCommit, filesFrequency.get(fileInCommit) + 1);
+			String issueNumber = CommitMessageParser.getIssueNumber(revCommit.getFullMessage());
+			if (issueNumber != null) {
+				issueCommits.put(issueNumber, new TreeSet<RevCommit>());
 			}
+			else {
+				commitsWithoutIssues.add(revCommit);
+			}
+		}
+		
+		gitHelper.AddCommitsForIssues(issueCommits);
+		
+		HashMap<String, Integer> filesFrequency = new HashMap<String, Integer>();
+		
+		for (RevCommit revCommit : commitsWithoutIssues) {
+			Set<String> filesInCommit = gitHelper.getChangedFiles(revCommit);
+			addCommitInfo(filesFrequency, filesInCommit);
+		}
+		
+		for (TreeSet<RevCommit> commitSet : issueCommits.values()) {
+			TreeSet<String> changedFiles = new TreeSet<String>();
+			for (RevCommit revCommit : commitSet) {
+				Set<String> filesInCommit = gitHelper.getChangedFiles(revCommit);
+				changedFiles.addAll(filesInCommit);
+			}
+			addCommitInfo(filesFrequency, changedFiles);
 		}
 		
 		int max = 0;
@@ -48,7 +69,7 @@ public class Searcher {
 			max = Math.max(max, val);
 		}
 		
-		System.out.println(max);
+		System.out.println(filesFrequency);
 		
 //		for (SearchResult result: results) {
 //			  System.out.println(String.format(
@@ -56,6 +77,15 @@ public class Searcher {
 //			      result.getScore(),
 //			      result.getObjectVector().getObject().toString()));
 //		}
+	}
+
+	private static void addCommitInfo(HashMap<String, Integer> filesFrequency, Set<String> filesInCommit) {
+		for (String fileInCommit : filesInCommit) {
+			if (!filesFrequency.containsKey(fileInCommit)) {
+				filesFrequency.put(fileInCommit, 0);
+			}
+			filesFrequency.put(fileInCommit, filesFrequency.get(fileInCommit) + 1);
+		}
 	}
 
 }

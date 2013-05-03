@@ -6,4 +6,5 @@ public class SourceData {
 	
 	public final static String[] QUERY = {"queue"};
 	
+	public final static String ISSUE_TRACKER_PREFIX = "JENKINS";
 }
