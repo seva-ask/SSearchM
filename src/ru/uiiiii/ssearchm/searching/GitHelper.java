@@ -29,7 +29,7 @@ public class GitHelper {
 	private BlameResult getBlameResult(String filePath) throws IOException, GitAPIException {
 		String docsPath = Indexer.DOCS_PATH;
 		
-		String filePathInsideRepo = filePath.replace(docsPath, "").substring(1); // remove \\
+		String filePathInsideRepo = filePath.replace(docsPath, "").substring(1).replace('\\', '/'); // substring(1) = remove '\'
 		
 		BlameCommand blame = git.blame();
 		blame.setFilePath(filePathInsideRepo);
