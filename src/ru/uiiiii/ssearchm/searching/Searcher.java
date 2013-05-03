@@ -1,5 +1,6 @@
 package ru.uiiiii.ssearchm.searching;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
@@ -38,6 +39,23 @@ public class Searcher {
 		HashMap<String, Double> sourceSearchResultsRatings = getRankedSourceSearchResults(results);
 		TreeMap<Double, TreeSet<String>> normalizedResult = getNormalizedResults(filesFrequency, sourceSearchResultsRatings);
 		
+		HashMap<String, Double> authors = new HashMap<String, Double>();
+		
+		for (Double rating : normalizedResult.keySet()) {
+			TreeSet<String> files = normalizedResult.get(rating);
+			for (String file : files) {
+				HashMap<String, Integer> fileAuthors = gitHelper.getAuthorsFromFile(file);
+				for (String author : fileAuthors.keySet()) {
+					if (!authors.containsKey(author)) {
+						authors.put(author, 0.0);					
+					}
+					authors.put(author, authors.get(author) + fileAuthors.get(author) * rating);
+				}
+			}
+		}
+		
+		System.out.println(authors);
+		
 		System.out.println("Search ended");
 	    Date endSearch = new Date();
 	    System.out.println(endSearch.getTime() - startSearch.getTime() + " total milliseconds");
@@ -69,17 +87,20 @@ public class Searcher {
 		TreeMap<Double, TreeSet<String>> targetResult = new TreeMap<Double, TreeSet<String>>(Collections.reverseOrder());
 		
 		for (String file : filesFrequency.keySet()) {
-			double sourceRating = 0;
-			if (sourceSearchResultsRatings.containsKey(file)) {
-				sourceRating = sourceSearchResultsRatings.get(file);
+			File testFile = new File(file);
+			if (testFile.exists()) {
+				double sourceRating = 0;
+				if (sourceSearchResultsRatings.containsKey(file)) {
+					sourceRating = sourceSearchResultsRatings.get(file);
+				}
+				int fileFrequency = filesFrequency.get(file);
+				double targetRating = sourceRating + fileFrequency * 0.01;
+				
+				if (!targetResult.containsKey(targetRating)) {
+					targetResult.put(targetRating, new TreeSet<String>());
+				}
+				targetResult.get(targetRating).add(file);
 			}
-			int fileFrequency = filesFrequency.get(file);
-			double targetRating = sourceRating + fileFrequency * 0.01;
-			
-			if (!targetResult.containsKey(targetRating)) {
-				targetResult.put(targetRating, new TreeSet<String>());
-			}
-			targetResult.get(targetRating).add(file);
 		}
 		return targetResult;
 	}
