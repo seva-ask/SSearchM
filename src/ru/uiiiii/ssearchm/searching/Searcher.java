@@ -2,6 +2,7 @@ package ru.uiiiii.ssearchm.searching;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
@@ -24,6 +25,9 @@ public class Searcher {
 
 	public static void main(String[] args) throws IOException, ZeroVectorException, NoHeadException, GitAPIException {
 		
+		System.out.println("Search started: query = \"" + SourceData.getQueryText() + "\"");
+	    Date startSearch = new Date();
+		
 		System.out.println("Semantic Vectors searching...");
 		LinkedList<SearchResult> results = SemanticVectorsSearcher.performSearch(SourceData.QUERY, MAX_RESULTS);
 		System.out.println("Semantic Vectors search ended...");
@@ -33,6 +37,12 @@ public class Searcher {
 		HashMap<String, Integer> filesFrequency = getFileFrequency(results, gitHelper);
 		HashMap<String, Double> sourceSearchResultsRatings = getRankedSourceSearchResults(results);
 		TreeMap<Double, TreeSet<String>> normalizedResult = getNormalizedResults(filesFrequency, sourceSearchResultsRatings);
+		
+		System.out.println("Search ended");
+	    Date endSearch = new Date();
+	    System.out.println(endSearch.getTime() - startSearch.getTime() + " total milliseconds");
+
+		System.out.println("Result:");
 		
 		System.out.println(normalizedResult);
 	}
