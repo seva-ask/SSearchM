@@ -79,10 +79,12 @@ public class GitHelper {
 				if (authorIdent != null) {
 					author = authorIdent.getName();
 				}
-				if (!authors.containsKey(author)) {
-					authors.put(author, 0);
+				if (author != null) {
+					if (!authors.containsKey(author)) {
+						authors.put(author, 0);
+					}
+					authors.put(author, authors.get(author) + 1);	
 				}
-				authors.put(author, authors.get(author) + 1);
 			}
 		}
 		return authors;

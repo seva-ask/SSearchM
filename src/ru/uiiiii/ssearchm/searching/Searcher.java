@@ -39,8 +39,45 @@ public class Searcher {
 		HashMap<String, Double> sourceSearchResultsRatings = getRankedSourceSearchResults(results);
 		TreeMap<Double, TreeSet<String>> normalizedResult = getNormalizedResults(filesFrequency, sourceSearchResultsRatings);
 		
-		HashMap<String, Double> authors = new HashMap<String, Double>();
+		TreeMap<Double, TreeSet<String>> normalizedAuthors = getNormalizedAuthors(gitHelper, normalizedResult);
 		
+		System.out.println("Search ended");
+	    Date endSearch = new Date();
+	    System.out.println(endSearch.getTime() - startSearch.getTime() + " total milliseconds");
+
+		System.out.println("Result:");
+		
+		System.out.println("Scope:");
+		System.out.println(normalizedResult);
+		
+		System.out.println("Authors:");
+		System.out.println(normalizedAuthors);
+	}
+
+	private static TreeMap<Double, TreeSet<String>> getNormalizedAuthors(
+			GitHelper gitHelper,
+			TreeMap<Double, TreeSet<String>> normalizedResult)
+			throws IOException, GitAPIException {
+		HashMap<String, Double> authors = getAuthors(gitHelper, normalizedResult);
+		
+		TreeMap<Double, TreeSet<String>> targetAuthors = new TreeMap<Double, TreeSet<String>>(Collections.reverseOrder());
+		
+		for (String author : authors.keySet()) {
+			double rating = authors.get(author);
+			if (!targetAuthors.containsKey(rating)) {
+				targetAuthors.put(rating, new TreeSet<String>());
+			}
+			targetAuthors.get(rating).add(author);
+		}
+		
+		TreeMap<Double, TreeSet<String>> normalizedAuthors = normalize(targetAuthors);
+		return normalizedAuthors;
+	}
+
+	private static HashMap<String, Double> getAuthors(GitHelper gitHelper, TreeMap<Double, TreeSet<String>> normalizedResult) throws IOException, GitAPIException {
+		System.out.println("Authors searching...");
+		HashMap<String, Double> authors = new HashMap<String, Double>();
+		int filesSearchedForAuthors = 0;
 		for (Double rating : normalizedResult.keySet()) {
 			TreeSet<String> files = normalizedResult.get(rating);
 			for (String file : files) {
@@ -51,25 +88,26 @@ public class Searcher {
 					}
 					authors.put(author, authors.get(author) + fileAuthors.get(author) * rating);
 				}
+				filesSearchedForAuthors++;
+				if (filesSearchedForAuthors > MAX_RESULTS) {
+					System.out.println("Authors searched...");
+					return authors;
+				}
 			}
 		}
-		
-		System.out.println(authors);
-		
-		System.out.println("Search ended");
-	    Date endSearch = new Date();
-	    System.out.println(endSearch.getTime() - startSearch.getTime() + " total milliseconds");
-
-		System.out.println("Result:");
-		
-		System.out.println(normalizedResult);
+		System.out.println("Authors searched...");
+		return authors;
 	}
 
 	private static TreeMap<Double, TreeSet<String>> getNormalizedResults(
 			HashMap<String, Integer> filesFrequency,
 			HashMap<String, Double> sourceSearchResultsRatings) {
 		TreeMap<Double, TreeSet<String>> targetResult = getTargetResults(filesFrequency, sourceSearchResultsRatings);
-		
+		TreeMap<Double, TreeSet<String>> normalizedResult = normalize(targetResult);
+		return normalizedResult;
+	}
+
+	private static TreeMap<Double, TreeSet<String>> normalize(TreeMap<Double, TreeSet<String>> targetResult) {
 		double max = targetResult.firstKey();
 		double min = targetResult.lastKey();
 		
