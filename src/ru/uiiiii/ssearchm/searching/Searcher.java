@@ -1,9 +1,11 @@
 package ru.uiiiii.ssearchm.searching;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -32,14 +34,52 @@ public class Searcher {
 		
 		HashMap<String, Integer> filesFrequency = getFileFrequency(results, gitHelper);
 		
-		System.out.println(filesFrequency);
+		HashMap<String, Double> sourceSearchResultsRatings = getRankedSourceSearchResults(results);
 		
-//		for (SearchResult result: results) {
-//			  System.out.println(String.format(
-//			      "%f:%s",
-//			      result.getScore(),
-//			      result.getObjectVector().getObject().toString()));
-//		}
+		TreeMap<Double, TreeSet<String>> targetResult = getTargetResults(
+				filesFrequency, sourceSearchResultsRatings);
+		
+		double max = targetResult.firstKey();
+		double min = targetResult.lastKey();
+		
+		TreeMap<Double, TreeSet<String>> normalizedResult = new TreeMap<Double, TreeSet<String>>(Collections.reverseOrder());
+		for (Double rating : targetResult.keySet()) {
+			double normalizedRating = (rating - min) / (max - min);
+			normalizedResult.put(normalizedRating, targetResult.get(rating));
+		}
+		
+		System.out.println(normalizedResult);
+	}
+
+	private static TreeMap<Double, TreeSet<String>> getTargetResults(
+			HashMap<String, Integer> filesFrequency,
+			HashMap<String, Double> sourceSearchResultsRatings) {
+		TreeMap<Double, TreeSet<String>> targetResult = new TreeMap<Double, TreeSet<String>>(Collections.reverseOrder());
+		
+		for (String file : filesFrequency.keySet()) {
+			double sourceRating = 0;
+			if (sourceSearchResultsRatings.containsKey(file)) {
+				sourceRating = sourceSearchResultsRatings.get(file);
+			}
+			int fileFrequency = filesFrequency.get(file);
+			double targetRating = sourceRating + fileFrequency * 0.01;
+			
+			if (!targetResult.containsKey(targetRating)) {
+				targetResult.put(targetRating, new TreeSet<String>());
+			}
+			targetResult.get(targetRating).add(file);
+		}
+		return targetResult;
+	}
+
+	private static HashMap<String, Double> getRankedSourceSearchResults(LinkedList<SearchResult> results) {
+		HashMap<String, Double> sourceSearchResultsRatings = new HashMap<String, Double>();
+		
+		for (SearchResult result: results) {
+			sourceSearchResultsRatings.put(result.getObjectVector().getObject().toString(), result.getScore());
+		}
+		
+		return sourceSearchResultsRatings;
 	}
 
 	private static HashMap<String, Integer> getFileFrequency(
