@@ -16,7 +16,6 @@ import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -66,16 +65,21 @@ public class GitHelper {
 	}
 	
 	public Set<String> getChangedFiles(RevCommit commit) throws MissingObjectException, IncorrectObjectTypeException, IOException {
+		TreeSet<String> result = new TreeSet<String>();
+		
 		Repository repository = git.getRepository();
 		RevWalk rw = new RevWalk(repository);
+		
+		if (commit.getParentCount() == 0) {
+			return result;
+		}
+		
 		RevCommit parent = rw.parseCommit(commit.getParent(0).getId());
 		DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
 		df.setRepository(repository);
 		df.setDiffComparator(RawTextComparator.DEFAULT);
 		df.setDetectRenames(true);
 		List<DiffEntry> diffs = df.scan(parent.getTree(), commit.getTree());
-		
-		TreeSet<String> result = new TreeSet<String>();
 		
 		for (DiffEntry diff : diffs) {
 			String filePathInsideRepo = diff.getNewPath();

@@ -1,6 +1,7 @@
 package ru.uiiiii.ssearchm.searching;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
@@ -32,7 +33,23 @@ public class Searcher {
 			commits.addAll(fileCommits);	
 		}
 		
-		System.out.println(gitHelper.getChangedFiles(commits.first()));
+		HashMap<String, Integer> filesFrequency = new HashMap<String, Integer>();
+		for (RevCommit revCommit : commits) {
+			Set<String> filesInCommit = gitHelper.getChangedFiles(revCommit);
+			for (String fileInCommit : filesInCommit) {
+				if (!filesFrequency.containsKey(fileInCommit)) {
+					filesFrequency.put(fileInCommit, 0);
+				}
+				filesFrequency.put(fileInCommit, filesFrequency.get(fileInCommit) + 1);
+			}
+		}
+		
+		int max = 0;
+		for (Integer val : filesFrequency.values()) {
+			max = Math.max(max, val);
+		}
+		
+		System.out.println(max);
 		
 //		for (SearchResult result: results) {
 //			  System.out.println(String.format(
