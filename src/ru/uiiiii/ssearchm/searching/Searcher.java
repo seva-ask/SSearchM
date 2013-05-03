@@ -8,6 +8,8 @@ import java.util.TreeSet;
 
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.NoHeadException;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import pitt.search.semanticvectors.SearchResult;
@@ -20,21 +22,41 @@ public class Searcher {
 
 	public static void main(String[] args) throws IOException, ZeroVectorException, NoHeadException, GitAPIException {
 		
+		System.out.println("Semantic Vectors searching...");
+		
 		LinkedList<SearchResult> results = SemanticVectorsSearcher.performSearch(SourceData.QUERY, MAX_RESULTS);
+		
+		System.out.println("Semantic Vectors search ended...");
 		
 		GitHelper gitHelper = new GitHelper(SourceData.DOCS_PATH);
 		
-		TreeSet<RevCommit> commits = new TreeSet<RevCommit>();
+		HashMap<String, Integer> filesFrequency = getFileFrequency(results, gitHelper);
 		
-		for (SearchResult result: results) {
-			String filePath = result.getObjectVector().getObject().toString();
-			Set<RevCommit> fileCommits = gitHelper.getCommitsFromFile(filePath);
-			commits.addAll(fileCommits);	
-		}
+		System.out.println(filesFrequency);
 		
-		TreeSet<RevCommit> commitsWithoutIssues = new TreeSet<RevCommit>(); 
+//		for (SearchResult result: results) {
+//			  System.out.println(String.format(
+//			      "%f:%s",
+//			      result.getScore(),
+//			      result.getObjectVector().getObject().toString()));
+//		}
+	}
+
+	private static HashMap<String, Integer> getFileFrequency(
+			LinkedList<SearchResult> results, GitHelper gitHelper)
+			throws IOException, GitAPIException, NoHeadException,
+			MissingObjectException, IncorrectObjectTypeException {
 		
+		System.out.println("Extracting commit info about found files...");
+		
+		TreeSet<RevCommit> commits = getCommitsFromSearchResults(results, gitHelper);
+		
+		System.out.println("Extracted commit info about found files...");
+		
+		TreeSet<RevCommit> commitsWithoutIssues = new TreeSet<RevCommit>(); 		
 		HashMap<String, TreeSet<RevCommit>> issueCommits = new HashMap<String, TreeSet<RevCommit>>();
+		
+		System.out.println("Parsing found commits for issue numbers...");
 		
 		for (RevCommit revCommit : commits) {
 			String issueNumber = CommitMessageParser.getIssueNumber(revCommit.getFullMessage());
@@ -46,7 +68,24 @@ public class Searcher {
 			}
 		}
 		
+		System.out.println("Parsed found commits for issue numbers...");
+		
+		System.out.println("Parsing all commits for found issue numbers...");
+		
 		gitHelper.AddCommitsForIssues(issueCommits);
+		
+		System.out.println("Parsed all commits for found issue numbers...");
+		
+		return calculateFileFrequency(gitHelper, commitsWithoutIssues, issueCommits);
+	}
+
+	private static HashMap<String, Integer> calculateFileFrequency(
+			GitHelper gitHelper, TreeSet<RevCommit> commitsWithoutIssues,
+			HashMap<String, TreeSet<RevCommit>> issueCommits)
+			throws MissingObjectException, IncorrectObjectTypeException,
+			IOException {
+		
+		System.out.println("Calculating file frequency...");
 		
 		HashMap<String, Integer> filesFrequency = new HashMap<String, Integer>();
 		
@@ -64,19 +103,20 @@ public class Searcher {
 			addCommitInfo(filesFrequency, changedFiles);
 		}
 		
-		int max = 0;
-		for (Integer val : filesFrequency.values()) {
-			max = Math.max(max, val);
+		System.out.println("Calculated file frequency...");
+		
+		return filesFrequency;
+	}
+
+	private static TreeSet<RevCommit> getCommitsFromSearchResults(LinkedList<SearchResult> results, GitHelper gitHelper) throws IOException, GitAPIException {
+		TreeSet<RevCommit> commits = new TreeSet<RevCommit>();
+		
+		for (SearchResult result: results) {
+			String filePath = result.getObjectVector().getObject().toString();
+			Set<RevCommit> fileCommits = gitHelper.getCommitsFromFile(filePath);
+			commits.addAll(fileCommits);	
 		}
-		
-		System.out.println(filesFrequency);
-		
-//		for (SearchResult result: results) {
-//			  System.out.println(String.format(
-//			      "%f:%s",
-//			      result.getScore(),
-//			      result.getObjectVector().getObject().toString()));
-//		}
+		return commits;
 	}
 
 	private static void addCommitInfo(HashMap<String, Integer> filesFrequency, Set<String> filesInCommit) {

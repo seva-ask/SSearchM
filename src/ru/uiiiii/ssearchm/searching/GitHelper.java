@@ -85,7 +85,7 @@ public class GitHelper {
 		
 		for (DiffEntry diff : diffs) {
 			String filePathInsideRepo = diff.getNewPath();
-			if (!filePathInsideRepo.equals("/dev/null")) {
+			if (!filePathInsideRepo.equals("/dev/null") && filePathInsideRepo.endsWith(".java")) {
 				String fullFilePath = docsPath + "\\" + filePathInsideRepo.replace('/', '\\');
 				result.add(fullFilePath);
 			}
