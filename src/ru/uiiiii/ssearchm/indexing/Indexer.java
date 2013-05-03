@@ -7,13 +7,12 @@ import org.apache.lucene.index.CorruptIndexException;
 import org.apache.lucene.store.LockObtainFailedException;
 
 import pitt.search.semanticvectors.BuildIndex;
+import ru.uiiiii.ssearchm.common.SourceData;
 
 public class Indexer {
 	
-	public final static String DOCS_PATH = "C:\\Projects\\SSearchM\\tests\\hudson";
-
 	public static void main(String[] args) throws CorruptIndexException, LockObtainFailedException, IOException {
-	    String docsPath = DOCS_PATH;
+	    String docsPath = SourceData.DOCS_PATH;
 	    String indexPath = "index";
 	    
 	    buildLuceneIndex(docsPath, indexPath);
