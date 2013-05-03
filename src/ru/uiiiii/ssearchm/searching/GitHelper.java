@@ -19,6 +19,7 @@ import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -64,6 +65,29 @@ public class GitHelper {
 		}
 		
 		return commits;
+	}
+	
+	public HashMap<String, Integer> getAuthorsFromFile(String filePath) throws IOException, GitAPIException {
+		HashMap<String, Integer> authors = new HashMap<String, Integer>();
+		BlameResult blameResult = getBlameResult(filePath);
+		if (blameResult != null) {
+			int linesCount = blameResult.getResultContents().size();
+			
+			for	(int i = 0; i < linesCount; i++) {
+				String author = null;
+				PersonIdent authorIdent = blameResult.getSourceCommitter(i);
+				if (authorIdent != null) {
+					author = authorIdent.getName();
+				}
+				if (author != null) {
+					if (!authors.containsKey(author)) {
+						authors.put(author, 0);
+					}
+					authors.put(author, authors.get(author) + 1);	
+				}
+			}
+		}
+		return authors;
 	}
 	
 	public Set<String> getChangedFiles(RevCommit commit) throws MissingObjectException, IncorrectObjectTypeException, IOException {
