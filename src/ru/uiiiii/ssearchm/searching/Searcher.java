@@ -25,19 +25,22 @@ public class Searcher {
 	public static void main(String[] args) throws IOException, ZeroVectorException, NoHeadException, GitAPIException {
 		
 		System.out.println("Semantic Vectors searching...");
-		
 		LinkedList<SearchResult> results = SemanticVectorsSearcher.performSearch(SourceData.QUERY, MAX_RESULTS);
-		
 		System.out.println("Semantic Vectors search ended...");
 		
 		GitHelper gitHelper = new GitHelper(SourceData.DOCS_PATH);
 		
 		HashMap<String, Integer> filesFrequency = getFileFrequency(results, gitHelper);
-		
 		HashMap<String, Double> sourceSearchResultsRatings = getRankedSourceSearchResults(results);
+		TreeMap<Double, TreeSet<String>> normalizedResult = getNormalizedResults(filesFrequency, sourceSearchResultsRatings);
 		
-		TreeMap<Double, TreeSet<String>> targetResult = getTargetResults(
-				filesFrequency, sourceSearchResultsRatings);
+		System.out.println(normalizedResult);
+	}
+
+	private static TreeMap<Double, TreeSet<String>> getNormalizedResults(
+			HashMap<String, Integer> filesFrequency,
+			HashMap<String, Double> sourceSearchResultsRatings) {
+		TreeMap<Double, TreeSet<String>> targetResult = getTargetResults(filesFrequency, sourceSearchResultsRatings);
 		
 		double max = targetResult.firstKey();
 		double min = targetResult.lastKey();
@@ -47,8 +50,7 @@ public class Searcher {
 			double normalizedRating = (rating - min) / (max - min);
 			normalizedResult.put(normalizedRating, targetResult.get(rating));
 		}
-		
-		System.out.println(normalizedResult);
+		return normalizedResult;
 	}
 
 	private static TreeMap<Double, TreeSet<String>> getTargetResults(
@@ -88,16 +90,13 @@ public class Searcher {
 			MissingObjectException, IncorrectObjectTypeException {
 		
 		System.out.println("Extracting commit info about found files...");
-		
 		TreeSet<RevCommit> commits = getCommitsFromSearchResults(results, gitHelper);
-		
 		System.out.println("Extracted commit info about found files...");
 		
 		TreeSet<RevCommit> commitsWithoutIssues = new TreeSet<RevCommit>(); 		
 		HashMap<String, TreeSet<RevCommit>> issueCommits = new HashMap<String, TreeSet<RevCommit>>();
 		
 		System.out.println("Parsing found commits for issue numbers...");
-		
 		for (RevCommit revCommit : commits) {
 			String issueNumber = CommitMessageParser.getIssueNumber(revCommit.getFullMessage());
 			if (issueNumber != null) {
@@ -107,13 +106,10 @@ public class Searcher {
 				commitsWithoutIssues.add(revCommit);
 			}
 		}
-		
 		System.out.println("Parsed found commits for issue numbers...");
 		
 		System.out.println("Parsing all commits for found issue numbers...");
-		
 		gitHelper.AddCommitsForIssues(issueCommits);
-		
 		System.out.println("Parsed all commits for found issue numbers...");
 		
 		return calculateFileFrequency(gitHelper, commitsWithoutIssues, issueCommits);
