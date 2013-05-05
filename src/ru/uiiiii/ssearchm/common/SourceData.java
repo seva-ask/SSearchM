@@ -2,9 +2,9 @@ package ru.uiiiii.ssearchm.common;
 
 public class SourceData {
 	
-	public final static String DOCS_PATH = "C:\\Projects\\SSearchM\\tests\\1\\hudson";
+	public final static String DOCS_PATH = "C:\\Projects\\SSearchM\\tests\\2\\Omlet";
 	
-	public final static String[] QUERY = {"queue"};
+	public final static String[] QUERY = {"image", "load"};
 	
 	public static String getQueryText() {
 		StringBuilder stringBuilder = new StringBuilder();

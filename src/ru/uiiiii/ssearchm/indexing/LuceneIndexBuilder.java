@@ -79,7 +79,7 @@ public class LuceneIndexBuilder {
 			    extension = fileName.substring(dotPos + 1);
 			}
 			
-			if (extension.equals("java")) {
+			if (extension.equals("cs")) {
 				luceneIndexDoc(writer, file);
 			}
 		}
