@@ -16,5 +16,5 @@ public class SourceData {
 		return result.substring(0, result.length() - 1);
 	}
 	
-	public final static String ISSUE_TRACKER_PREFIX = "JENKINS";
+	public final static String ISSUE_TRACKER_PREFIX = "STREAM";
 }
