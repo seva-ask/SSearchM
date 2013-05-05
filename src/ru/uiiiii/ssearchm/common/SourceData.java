@@ -4,7 +4,7 @@ public class SourceData {
 	
 	public final static String DOCS_PATH = "C:\\Projects\\SSearchM\\tests\\2\\Omlet";
 	
-	public final static String[] QUERY = {"image", "load"};
+	public final static String[] QUERY = {"wallet"};
 	
 	public static String getQueryText() {
 		StringBuilder stringBuilder = new StringBuilder();
