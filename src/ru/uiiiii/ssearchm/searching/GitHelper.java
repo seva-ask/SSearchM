@@ -61,7 +61,10 @@ public class GitHelper {
 		TreeSet<RevCommit> commits = new TreeSet<RevCommit>();
 		
 		for	(int i = 0; i < linesCount; i++) {
-			commits.add(blameResult.getSourceCommit(i));
+			RevCommit commit = blameResult.getSourceCommit(i);
+			if (commit != null) {
+				commits.add(commit);
+			}
 		}
 		
 		return commits;
