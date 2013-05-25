@@ -22,6 +22,7 @@ import ru.uiiiii.ssearchm.common.SourceData;
 
 public class Searcher {
 
+	private static final double COMMIT_WEIGHT = 0.01;
 	private static final int MAX_RESULTS = 20;
 
 	public static void main(String[] args) throws IOException, ZeroVectorException, NoHeadException, GitAPIException {
@@ -111,7 +112,7 @@ public class Searcher {
 		double max = targetResult.firstKey();
 		double min = targetResult.lastKey();
 		
-		TreeMap<Double, TreeSet<String>> normalizedResult = new TreeMap<Double, TreeSet<String>>(Collections.reverseOrder());
+		TreeMap<Double, TreeSet<String>> normalizedResult = new ResultsSet(Collections.reverseOrder());
 		for (Double rating : targetResult.keySet()) {
 			double normalizedRating = (rating - min) / (max - min);
 			normalizedResult.put(normalizedRating, targetResult.get(rating));
@@ -132,7 +133,7 @@ public class Searcher {
 					sourceRating = sourceSearchResultsRatings.get(file);
 				}
 				int fileFrequency = filesFrequency.get(file);
-				double targetRating = sourceRating + fileFrequency * 0.01;
+				double targetRating = sourceRating + fileFrequency * COMMIT_WEIGHT;
 				
 				if (!targetResult.containsKey(targetRating)) {
 					targetResult.put(targetRating, new TreeSet<String>());
